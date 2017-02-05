@@ -1,0 +1,233 @@
+#!/bin/bash
+
+#
+# Script to rebuild system caches under macOS.
+#
+# Suggest editing this script via Sublime Text.
+#
+#
+
+
+sudo -k # Force to kill root privilege.
+
+
+#================================= GLOBAL VARS ==================================
+
+
+#
+# The arguments we are using.
+#
+gArgv=`echo "$1" | tr '[:upper:]' '[:lower:]'`
+
+
+#
+# Debug Mode: (Default off.)
+# 0 - OFF.
+# 1 - ON.
+#
+# Note: '-d' argument / getScptArg() will set/override this. (If used.)
+#
+gDBG=0
+
+
+#
+# Target volume. (Will be initialized later on.í)
+#
+gDest=""
+
+
+#
+# The version info of the running system e.g. '10.12.1'
+#
+gProductVersion="$(sw_vers -productVersion)"
+
+
+#
+#--------------------------------------------------------------------------------
+#
+
+
+function _print_usage() {
+	printf "\nRebuildCaches, Copyright (c) 2007-`date "+%Y"` Angel W. All rights reserved.\n\n"
+	printf "Usage:\n"
+	printf "\tRebuildCaches <args>\n\n"
+	printf "\tThe following arguments are currently available:\n"
+	printf "\t-h: Show help infomation. (Print this.)\n"
+	printf "\t-t <target volume>: Rebuild caches for <target volume>.\n\t  Example: -t /\n"
+
+	exit 0
+}
+
+
+#
+#--------------------------------------------------------------------------------
+#
+
+
+function testSIP() {
+	local SYS_MAJOR_VER=${gProductVersion:3:2}
+	# 
+	# Are we using 10.11+?
+	#
+	if [[ ${SYS_MAJOR_VER} -ge 11 ]]; then
+		local sipStat=`csrutil status`
+		case "$sipStat" in
+			*"System Integrity Protection status: enabled."* )
+				echo "SIP enabled"
+			;;
+			*"Kext Signing: enabled"* )
+				echo "SIP enabled"
+			;;
+			*"System Integrity Protection status: disabled."* )
+				echo "SIP OK"
+			;;
+			*"Kext Signing: disabled"* )
+				echo "SIP OK"
+			;;
+		esac
+	fi
+}
+
+
+#
+#--------------------------------------------------------------------------------
+#
+
+
+function _rebuild_caches() {
+	local gDest="$1"
+	local KC_CLT="${gDest}/usr/sbin/kextcache"
+
+	local KC_args="-u"
+
+	#
+	# Is `kextcache` NOT in place?
+	#
+	if [ ! -f "${KC_CLT}" ]; then
+		echo "ERROR: ${KC_CLT} NOT found!"
+		exit 1
+	fi
+
+	#
+	# SIP in place? Print warning.
+	#
+	if [[ `testSIP` =~ "enabled" ]]; then
+		printf "Warning: Your system is 10.11+ and SIP is now enabled.\nUntrusted Kexts won't be loaded after rebuilding caches!!!\n"
+		read -p "Do you want to continue? (y/n) " fRebuildYorN
+		case "${fRebuildYorN}" in
+			y|Y )
+			;;
+			* 	)
+				echo "Aborting script."
+				exit 1
+			;;
+		esac
+	fi
+	#
+	# Start rebuilding caches.
+	#
+	touch "${gDest}/System/Library/Extensions"
+	touch "${gDest}/Library/Extensions"
+	kextcache -Boot -u "${gDest}"
+	exit 0
+}
+
+
+#
+#--------------------------------------------------------------------------------
+#
+
+
+function getScptArg() {
+	#
+	# Are we fired up with arguments?
+	#
+	# Note: For -h, we call it from START. See below.
+	#
+	if [[ $# -gt 0 ]]; then
+		#
+		# Fingure out what arguments are used.
+		#
+		while [ "${1}" ]; do
+			#
+			# Are the arguments we are using valid?
+			#
+			if [[ "${1}" =~ ^[-tT]+$ ]]; then	# More arguments are coming...
+				#
+				# Yes. Fingure out what they are.
+				#
+				case "${1}" in
+					-t )
+						#
+						# Override gDest.
+						#
+						shift
+						#
+						# Is gDest a null string?
+						#
+						if [[ "$1" == "" ]]; then
+							#
+							# Yes. Print usage.
+							#
+							printf "\nInvalid destnation: $1!!!\n"
+							_print_usage
+						else
+							#
+							# Start overriding.
+							#
+							gDest="$1"
+						fi
+						#
+						# Rebuild caches.
+						#
+						_rebuild_caches "${gDest}"
+					;;
+				esac
+			else
+				#
+				# Invalid. Print usage.
+				#
+				printf "Invalid argument: ${1}\n\n"
+				_print_usage
+			fi
+		done
+	fi
+}
+
+
+#
+#--------------------------------------------------------------------------------
+#
+
+
+function main() {
+	getScptArg "$@"
+}
+
+#==================================== START =====================================
+
+
+#
+# For help, we don't need root privilege and thus we will call _print_usage() directly.
+#
+if [[ $# == 0 || $# == 1 && "$gArgv" == "-h" ]]; then
+	_print_usage
+fi
+
+#
+# Normal usage. Run as root.
+#
+if [[ $EUID != 0 ]]; then
+	clear
+	sudo "$0" "$@"
+else
+	main "$@"
+fi
+
+
+#================================================================================
+
+
+exit 0
+
+# EOF
