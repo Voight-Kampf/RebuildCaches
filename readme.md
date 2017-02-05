@@ -10,7 +10,7 @@ How to use?
 Download the latest openGate.sh by entering the following command in a terminal window:
 
 ``` sh
-sudo curl -o /usr/local/bin RebuildCaches https://raw.githubusercontent.com/PMheart/RebuildCaches/master/RebuildCaches
+sudo curl -o /usr/local/bin/RebuildCaches https://raw.githubusercontent.com/PMheart/RebuildCaches/master/RebuildCaches
 ```
 
 This will download ```RebuildCaches``` to /usr/local/bin and thus you can run it just by typing:
@@ -20,7 +20,7 @@ RebuildCaches
 
 Now we shall change the permissions of the script so that it can be run:
 ``` sh
-sudo chmod +x /usr/local/binRebuildCaches
+sudo chmod +x /usr/local/bin/RebuildCaches
 ```
 
 Details for using:
