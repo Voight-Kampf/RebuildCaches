@@ -21,16 +21,6 @@ gArgv=`echo "$1" | tr '[:upper:]' '[:lower:]'`
 
 
 #
-# Debug Mode: (Default off.)
-# 0 - OFF.
-# 1 - ON.
-#
-# Note: '-d' argument / getScptArg() will set/override this. (If used.)
-#
-gDBG=0
-
-
-#
 # Target volume. (Will be initialized later on.í)
 #
 gDest=""
