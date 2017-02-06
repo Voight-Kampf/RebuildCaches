@@ -3,11 +3,11 @@ RebuildCaches
 
 At a glance. You may not imagine that this script is just for fun. To be honest. It's too boring at the airport and therefore I wrote it...
 Ah. This script aims at rebuilding system caches easily under macOS.
-Also. Cuz I wrote this with several kinds of text editor like Xcode, Sublime Text, Atom... and the code will look like a mess. But everything will be fine under Sublime Text. Who cares. 😉
+Also. Cuz I wrote this with several kinds of text editor like Xcode, Sublime Text, Atom... And the code will look like a mess. But everything will be fine under Sublime Text. Who cares. 😉
 
 How to use?
 -------------
-Download the latest openGate.sh by entering the following command in a terminal window:
+Download the latest RebuildCaches by entering the following command in a terminal window:
 
 ``` sh
 sudo curl -o /usr/local/bin/RebuildCaches https://raw.githubusercontent.com/PMheart/RebuildCaches/master/RebuildCaches
